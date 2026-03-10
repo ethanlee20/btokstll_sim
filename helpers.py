@@ -2,6 +2,15 @@
 
 from dataclasses import dataclass, astuple, asdict
 from random import seed, uniform
+from functools import cached_property
+from json import dump, load
+
+
+def safer_convert_to_int(
+    x,
+):
+    assert x.is_integer()
+    return int(x)
 
 
 @dataclass
@@ -48,7 +57,6 @@ class Sampler:
         seed_:int|None=None,
     ):
         seed(seed_)
-        self.dist = dist
         self._dist_items = asdict(dist).items()
 
     def sample(
@@ -75,39 +83,42 @@ class Sampler:
 @dataclass(frozen=True)
 class Trial_Metadata:
     trial_num: int
-    num_events_per_trial: int
+    num_events: int
     num_subtrials: int
     split: str
     lepton_flavor: str
-    delta_wilson_coefficient_set: Delta_Wilson_Coefficient_Set
-    delta_wilson_coefficient_distribution: Uniform_Delta_Wilson_Coefficient_Distribution
+    wc_set: WC_Set
+    wc_dist: Uniform_WC_Distribution
 
-    @functools.cached_property
+    @cached_property
     def num_events_per_subtrial(
-        self
+        self,
     ):
         return safer_convert_to_int(
-            self.num_events_per_trial
+            self.num_events
             / self.num_subtrials
         )
     
     def to_json_file(
         self, 
-        path
+        path,
     ):
-        metadata_dict = dataclasses.asdict(self)
         with open(path, 'x') as file:
-            json.dump(metadata_dict, file, indent=4)
+            dump(
+                asdict(self), 
+                file, 
+                indent=4,
+            )
 
     @classmethod
     def from_json_file(
         cls, 
-        path
+        path,
     ):
         # Requires manual object reconstruction.
 
-        with open(path, 'r') as f:
-            metadata_dict = json.load(f)
+        with open(path, 'r') as file:
+            metadata_dict = load(file)
         
         def reconstruct(dict, key, cls_):
             dict[key] = cls_(**dict[key])
@@ -174,12 +185,12 @@ class Directory_Manager:
         return [
             Trial_Metadata(
                 trial_num=trial, 
-                num_events_per_trial=self.num_events_per_trial, 
+                num_events=self.num_events_per_trial, 
                 num_subtrials=self.num_subtrials,
                 split=self.split,
                 lepton_flavor=self.lepton_flavor,
-                delta_wilson_coefficient_set=sample,
-                delta_wilson_coefficient_distribution=self.delta_wilson_coefficient_distribution,
+                wc_set=sample,
+                wc_dist=self.delta_wilson_coefficient_distribution,
             ) for trial, sample in zip(
                 self.trial_range, 
                 self.delta_wilson_coefficient_set_samples
@@ -208,11 +219,11 @@ class Directory_Manager:
             name = (
                 f"{m.trial_num}"
                 f"_{m.split}"
-                f"_{m.num_events_per_trial}"
+                f"_{m.num_events}"
                 f"_{m.lepton_flavor}"
             )
             for c in dataclasses.astuple(
-                m.delta_wilson_coefficient_set
+                m.wc_set
             ):
                 name += f"_{c:.2f}"
             return name
@@ -359,7 +370,7 @@ class Job_Submitter:
             write_dec_file(
                 decay_file_path, 
                 metadata.lepton_flavor, 
-                metadata.delta_wilson_coefficient_set
+                metadata.wc_set
             )
 
             for subtrial in range(metadata.num_subtrials):

@@ -1,52 +1,49 @@
 
-from dataclasses import dataclass, astuple, asdict
+from dataclasses import astuple, asdict
 from pathlib import Path
-from functools import cached_property
-from json import load
+from random import seed, uniform
 
-from .wc_types import Uniform_WC_Distribution, WC_Set
-from .config import metadata_file_name
-from .util import safer_convert_to_int, dump_json
+from .types_ import Uniform_WC_Dist, WC_Set, Metadata, Paths
 
 
-@dataclass(frozen=True)
-class Trial_Metadata:
-    trial_num: int
-    num_events: int
-    num_subtrials: int
-    split: str
-    lepton_flavor: str
-    wc_set: WC_Set
-    wc_dist: Uniform_WC_Distribution
-
-    @cached_property
-    def num_events_per_subtrial(
-        self,
-    ):
-        return safer_convert_to_int(
-            self.num_events
-            / self.num_subtrials
-        )
-    
-    def to_json_file(
+class Sampler:
+    def __init__(
         self, 
-        path,
-    ) -> None:
-        dump_json(
-            asdict(self), 
-            path,
+        dist:Uniform_WC_Dist,
+        seed_:int|None=None,
+    ):
+        seed(seed_)
+        self._dist_items = asdict(dist).items()
+
+    def sample(
+        self, 
+        n:int,
+    ) -> list[WC_Set]:
+        return [
+            self._sample()
+            for _ in range(n)
+        ]
+    
+    def _sample(
+        self,
+    ) -> WC_Set:
+        return WC_Set(
+            **{
+                wc: uniform(*bounds) 
+                for wc, bounds in self._dist_items
+            }
         )
 
 
-def _make_metadatas(
+def _make_metadata_list(
     num_trials,
     wc_samples:list[WC_Set],
-    num_events_per_trial:int,
+    num_trial_events:int,
     num_subtrials:int,
     split:str,
     lepton_flavor:str,
-    wc_dist:Uniform_WC_Distribution,
-) -> list[Trial_Metadata]:
+    wc_dist:Uniform_WC_Dist,
+) -> list[Metadata]:
     if num_trials != len(wc_samples):
         raise ValueError(
             "Number of samples" 
@@ -55,14 +52,14 @@ def _make_metadatas(
             f" ({num_trials})."
         )
     return [
-        Trial_Metadata(
-            trial_num=trial, 
-            num_events=num_events_per_trial, 
-            num_subtrials=num_subtrials,
-            split=split,
-            lepton_flavor=lepton_flavor,
-            wc_set=sample,
-            wc_dist=wc_dist,
+        Metadata(
+            trial, 
+            num_trial_events, 
+            num_subtrials,
+            split,
+            lepton_flavor,
+            sample,
+            wc_dist,
         ) for trial, sample in enumerate( 
             wc_samples
         )
@@ -70,7 +67,7 @@ def _make_metadatas(
 
 
 def _make_subdir_name(
-    metadata:Trial_Metadata,
+    metadata:Metadata,
 ) -> str:
     name = (
         f"{metadata.trial_num}"
@@ -85,27 +82,24 @@ def _make_subdir_name(
 
 def _setup_subdirs(
     dir_:Path,
-    metadatas:list[Trial_Metadata],
+    metadata_list:list[Metadata],
 ) -> None:
     if not dir_.is_dir():
         raise ValueError(
             "Data directory is not a directory."
+            f" ({dir_})"
         )
-    dir_names = [
-        _make_subdir_name(m) 
-        for m in metadatas
-    ]
     dir_paths = [
-        dir_.joinpath(n) 
-        for n in dir_names
+        dir_.joinpath(_make_subdir_name(m)) 
+        for m in metadata_list
     ]
-    for dir_path, metadata in zip(
+    for p, m in zip(
         dir_paths, 
-        metadatas,
+        metadata_list,
     ):
-        dir_path.mkdir()
-        metadata.to_json_file(
-            dir_path.joinpath(metadata_file_name)
+        p.mkdir()
+        m.to_json_file(
+            Paths(p).metadata_file_name
         )
 
 
@@ -113,23 +107,22 @@ def setup_dir(
     dir_:Path,  
     num_trials:int,
     wc_samples:list[WC_Set],
-    num_events_per_trial:int,
+    num_trial_events:int,
     num_subtrials:int,
     split:str,
     lepton_flavor:str,
-    wc_dist:Uniform_WC_Distribution,
+    wc_dist:Uniform_WC_Dist,
 ) -> None:
     dir_.mkdir(exist_ok=True)
-    metadatas = _make_metadatas(
-        num_trials=num_trials,
-        wc_samples=wc_samples, 
-        num_events_per_trial=num_events_per_trial, 
-        num_subtrials=num_subtrials, 
-        split=split, 
-        lepton_flavor=lepton_flavor, 
-        wc_dist=wc_dist,
-    )
     _setup_subdirs(
-        dir_, 
-        metadatas,
+        dir_,
+        _make_metadata_list(
+            num_trials,
+            wc_samples, 
+            num_trial_events, 
+            num_subtrials, 
+            split, 
+            lepton_flavor, 
+            wc_dist,
+        )
     )

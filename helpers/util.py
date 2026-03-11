@@ -61,12 +61,26 @@ class WC_Set:
     d_c_9: float
     d_c_10: float
 
+    def __iter__(self):
+        return (
+            self.d_c_7,
+            self.d_c_9,
+            self.d_c_10,
+        ).__iter__()
+
 
 @dataclass(frozen=True)
 class Uniform_WC_Dist:
     d_c_7: Interval 
     d_c_9: Interval 
     d_c_10: Interval 
+
+    def __iter__(self):
+        return (
+            self.d_c_7, 
+            self.d_c_9, 
+            self.d_c_10,
+        ).__iter__()
 
 
 @dataclass

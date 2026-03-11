@@ -13,7 +13,7 @@ class Sampler:
         seed_:int|None=None,
     ):
         seed(seed_)
-        self._dist_items = asdict(dist).items()
+        self.dist = dist
 
     def sample(
         self, 
@@ -28,12 +28,11 @@ class Sampler:
         self,
     ) -> WC_Set:
         return WC_Set(
-            **{
-                wc: uniform(*bounds) 
-                for wc, bounds in self._dist_items
-            }
+            *(
+                uniform(*bounds) 
+                for bounds in self.dist
+            )
         )
-
 
 def _make_metadata_list(
     num_trials,
@@ -99,7 +98,7 @@ def _setup_subdirs(
     ):
         p.mkdir()
         m.to_json_file(
-            Paths(p).metadata_file_name
+            Paths(p).metadata_file_path
         )
 
 
@@ -113,7 +112,7 @@ def setup_dir(
     lepton_flavor:str,
     wc_dist:Uniform_WC_Dist,
 ) -> None:
-    dir_.mkdir(exist_ok=True)
+    dir_.mkdir(exist_ok=False)
     _setup_subdirs(
         dir_,
         _make_metadata_list(

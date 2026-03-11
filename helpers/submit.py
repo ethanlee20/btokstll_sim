@@ -60,11 +60,18 @@ def _submit_job(
     sim_file_path:Path,
     recon_file_path:Path,
     log_file_path:Path,
-):
-    run(
+    debug:bool=False,
+) -> None:
+    command = (
         f'bsub -q l "basf2 {sim_steer_file_path} -- {decay_file_path} {sim_file_path} {num_events} &>> {log_file_path}'
         f' && basf2 {recon_steer_file_path} {lepton_flavor} {sim_file_path} {recon_file_path} &>> {log_file_path}'
-        f' && rm {sim_file_path}"',
+        f' && rm {sim_file_path}"'
+    )
+    if debug:
+        print(command, '\n')
+        return
+    run(
+        command,
         shell=True,
     )
 
@@ -88,24 +95,26 @@ def _get_incomplete_dirs(
 ) -> list[Path]:
     return [
         p.parent
-        for p in dir_.glob(Paths.metadata_file_name)
+        for p in dir_.rglob(Paths.metadata_file_name)
         if _check_incomplete(p.parent)
     ]
 
 
 def submit_jobs(
     dir_:Path,
-    recon_steer_file_path:Path,
     sim_steer_file_path:Path,
+    recon_steer_file_path:Path,
     batch_size:int=500, 
     batch_wait:int=300,
+    job_wait:int|float=0.1,
+    debug:bool=False,
 ) -> None:
     if not dir_.is_dir():
         raise ValueError(
             "Data directory is not directory:"
             f" ({dir_})."
         )
-    num_submitted_jobs = 0    
+    num_submitted_jobs = 0
     for p in _get_incomplete_dirs(dir_):
         paths = Paths(p)
         metadata = Metadata.from_json_file(
@@ -126,7 +135,10 @@ def submit_jobs(
                 paths.sim_file_path(subtrial),
                 paths.recon_file_path(subtrial),
                 paths.log_file_path,
+                debug=debug,
             )
             num_submitted_jobs += 1
+            sleep(job_wait)
+
             if num_submitted_jobs % batch_size == 0:
                 sleep(batch_wait)

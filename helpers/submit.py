@@ -104,8 +104,8 @@ def submit_jobs(
     dir_:Path,
     sim_steer_file_path:Path,
     recon_steer_file_path:Path,
-    batch_size:int=500, 
-    batch_wait:int=300,
+    batch_size:int=250, 
+    batch_wait:int=120,
     job_wait:int|float=0.1,
     debug:bool=False,
 ) -> None:

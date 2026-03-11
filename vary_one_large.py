@@ -11,6 +11,7 @@ from helpers import Sampler, Uniform_WC_Dist, Interval, setup_dir, submit_jobs
 
 run_setup = True
 run_submit = True
+debug = True
 
 sim_steer_file_path = Path("steering/steer_sim.py")
 recon_steer_file_path = Path("steering/steer_recon.py")
@@ -66,10 +67,10 @@ if run_setup:
             lepton_flavor, 
             dist_,
         )
-    if run_submit:
-        submit_jobs(
-            dir_, 
-            sim_steer_file_path, 
-            recon_steer_file_path, 
-            debug=True
-        )
+        if run_submit:
+            submit_jobs(
+                dir_, 
+                sim_steer_file_path, 
+                recon_steer_file_path, 
+                debug=debug,
+            )

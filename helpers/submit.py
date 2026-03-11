@@ -3,7 +3,7 @@ from pathlib import Path
 from subprocess import run
 from time import sleep
 
-from .types_ import WC_Set, Metadata, Paths
+from .util import WC_Set, Metadata, Paths
 
 
 def _write_dec_file(

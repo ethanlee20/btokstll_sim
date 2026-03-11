@@ -3,7 +3,7 @@ from dataclasses import astuple, asdict
 from pathlib import Path
 from random import seed, uniform
 
-from .types_ import Uniform_WC_Dist, WC_Set, Metadata, Paths
+from .util import Uniform_WC_Dist, WC_Set, Metadata, Paths
 
 
 class Sampler:

@@ -1,8 +1,11 @@
 *
 !*/
 
-__pycache__
 
+# ignore these directories
+__pycache__
+.env
+
+# track these file types
 !*.py
-!*.toml
 !*.gitignore

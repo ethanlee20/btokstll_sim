@@ -1,10 +1,14 @@
 
+"""
+Generate Standard Model events.
+"""
+
 from pathlib import Path
 
 from helpers import Sampler, Uniform_WC_Dist, Interval, setup_dir, submit_jobs
 
 
-run_setup = False
+run_setup = True
 run_submit = True
 
 sim_steer_file_path = Path("steering/steer_sim.py")
@@ -12,11 +16,11 @@ recon_steer_file_path = Path("steering/steer_recon.py")
 
 
 
-data_dir = Path("data/vary_one/vary_7_train")
+data_dir = Path("data/sm")
 
-num_trials = 10
+num_trials = 5
 dist = Uniform_WC_Dist(
-    d_c_7=Interval(-0.5, 0.5), 
+    d_c_7=Interval(0, 0), 
     d_c_9=Interval(0, 0), 
     d_c_10=Interval(0, 0),
 )
@@ -30,9 +34,9 @@ if run_setup:
         data_dir, 
         num_trials=num_trials, 
         wc_samples=samples, 
-        num_trial_events=20, 
-        num_subtrials=2, 
-        split="train", 
+        num_trial_events=10_000, 
+        num_subtrials=1, 
+        split="_", 
         lepton_flavor="mu", 
         wc_dist=dist,
     )

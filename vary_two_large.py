@@ -16,46 +16,26 @@ debug = True
 sim_steer_file_path = Path("steering/steer_sim.py")
 recon_steer_file_path = Path("steering/steer_recon.py")
 
-def data_dir(
-    wc:int, 
-    split:str
-) -> Path:
-    return Path(
-        f"data/vary_one_large/vary_c{wc}_{split}/"
-    )
+data_dir = lambda split: Path(f"data/vary_two_large/vary_c7_c9_{split}/")
 
-def dist(
-    wc:int
-) -> Uniform_WC_Dist:
-    if wc == 7:
-        return Uniform_WC_Dist(
-            d_c_7=Interval(-1, 1),
-            d_c_9=Interval(0, 0),
-            d_c_10=Interval(0, 0),
-        )
-    elif wc == 9:
-        return Uniform_WC_Dist(
-            d_c_7=Interval(0, 0),
-            d_c_9=Interval(-10, 0),
-            d_c_10=Interval(0, 0),
-        )     
-    else: 
-        raise ValueError()
-    
+dist = Uniform_WC_Dist(
+    d_c_7=Interval(-1, 1),
+    d_c_9=Interval(-10, 0),
+    d_c_10=Interval(0, 0),
+)
+
 splits = ("train", "val")
-wc_s = (7, 9)
-num_trials = {"train": 200, "val": 10}
+num_trials = {"train": 200, "val": 20}
 num_trial_events = {"train": 5_000, "val": 25_000}
 num_subtrials = 1
 lepton_flavor = "mu"
 
 
 if run_setup:
-    for wc, split in product(wc_s, splits):
-        dist_ = dist(wc)
-        dir_ = data_dir(wc, split)
+    for split in splits:
+        dir_ = data_dir(split)
         samples = (
-            Sampler(dist_)
+            Sampler(dist)
             .sample(num_trials[split])
         )
         setup_dir(
@@ -65,7 +45,7 @@ if run_setup:
             num_subtrials, 
             split, 
             lepton_flavor, 
-            dist_,
+            dist,
         )
         if run_submit:
             submit_jobs(

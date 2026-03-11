@@ -112,7 +112,10 @@ def setup_dir(
     lepton_flavor:str,
     wc_dist:Uniform_WC_Dist,
 ) -> None:
-    dir_.mkdir(exist_ok=False)
+    dir_.mkdir(
+        parents=True, 
+        exist_ok=False
+    )
     _setup_subdirs(
         dir_,
         _make_metadata_list(

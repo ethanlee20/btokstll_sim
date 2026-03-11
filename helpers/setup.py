@@ -35,7 +35,6 @@ class Sampler:
         )
 
 def _make_metadata_list(
-    num_trials,
     wc_samples:list[WC_Set],
     num_trial_events:int,
     num_subtrials:int,
@@ -43,13 +42,6 @@ def _make_metadata_list(
     lepton_flavor:str,
     wc_dist:Uniform_WC_Dist,
 ) -> list[Metadata]:
-    if num_trials != len(wc_samples):
-        raise ValueError(
-            "Number of samples" 
-            f" ({len(wc_samples)})" 
-            " must match number of trials"
-            f" ({num_trials})."
-        )
     return [
         Metadata(
             trial, 
@@ -104,7 +96,6 @@ def _setup_subdirs(
 
 def setup_dir(
     dir_:Path,  
-    num_trials:int,
     wc_samples:list[WC_Set],
     num_trial_events:int,
     num_subtrials:int,
@@ -119,7 +110,6 @@ def setup_dir(
     _setup_subdirs(
         dir_,
         _make_metadata_list(
-            num_trials,
             wc_samples, 
             num_trial_events, 
             num_subtrials, 

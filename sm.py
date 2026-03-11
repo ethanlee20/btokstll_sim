@@ -1,6 +1,6 @@
 
 """
-Generate Standard Model events.
+Generate Standard Model events!
 """
 
 from pathlib import Path

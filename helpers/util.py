@@ -115,7 +115,7 @@ class Metadata:
     def from_json_file(
         cls, 
         path:Path,
-    ) -> Metadata:
+    ):
         dict_ = load_json(path)
         for key, cls_ in zip(
             ["wc_set", "wc_dist"], 

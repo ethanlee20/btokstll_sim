@@ -26,83 +26,61 @@ sm_parameter_bounds = {
 }
 
 
-# Training dataset with varying parameters
+# Metadata
 
-train_vary_metadata = RunMetadata(
-    split="train_vary",
-    total_num_events=5_000_000,
-    num_trials=1_000,  # each trial represents a different parameter configuration
-    num_subtrials_per_trial=1,
-    parameter_bounds=vary_parameter_bounds,
-    sampling_type="grid",
-    parameter_grid_counts={  # number of grid points along each axis
-        "dC_7": 1,
-        "dC_9": 1_000,
-        "dC_10": 1,
-    },
-)
-
-train_vary_dir = setup_run_dir(
-    run_metadata=train_vary_metadata,
-    parent_dir=data_dir,
-)
-
-submit_jobs(
-    run_dir=train_vary_dir,
-    sim_steer_file_path=sim_steer_file_path,
-    recon_steer_file_path=recon_steer_file_path,
-    template_dec_file_path=template_dec_file_path,
-    debug=debug,
-)
-
-
-# Training dataset with Standard Model parameters
-
-train_sm_metadata = RunMetadata(
-    split="train_sm",
-    total_num_events=5_000_000,
-    num_trials=1,
-    num_subtrials_per_trial=1_000,
-    parameter_bounds=sm_parameter_bounds,
-    sampling_type="grid",
-    parameter_grid_counts={
-        "dC_7": 1,
-        "dC_9": 1,
-        "dC_10": 1,
-    },
-)
-
-train_sm_dir = setup_run_dir(
-    run_metadata=train_sm_metadata,
-    parent_dir=data_dir,
-)
-
-submit_jobs(
-    run_dir=train_sm_dir,
-    sim_steer_file_path=sim_steer_file_path,
-    recon_steer_file_path=recon_steer_file_path,
-    template_dec_file_path=template_dec_file_path,
-    debug=debug,
-)
+metadatas = [
+    RunMetadata(
+        split="train_vary",
+        total_num_events=5_000_000,
+        num_trials=1_000,
+        num_subtrials_per_trial=1,
+        parameter_bounds=vary_parameter_bounds,
+        sampling_type="grid",
+        parameter_grid_counts={
+            "dC_7": 1,
+            "dC_9": 1_000,
+            "dC_10": 1,
+        },
+    ),
+    RunMetadata(
+        split="train_sm",
+        total_num_events=5_000_000,
+        num_trials=1,
+        num_subtrials_per_trial=1_000,
+        parameter_bounds=sm_parameter_bounds,
+        sampling_type="grid",
+        parameter_grid_counts={
+            "dC_7": 1,
+            "dC_9": 1,
+            "dC_10": 1,
+        },
+    ),
+    RunMetadata(
+        split="val",
+        total_num_events=320_000,
+        num_trials=20,
+        num_subtrials_per_trial=1,
+        parameter_bounds=vary_parameter_bounds,
+        sampling_type="random",
+    )
+]
 
 
-# Validation dataset with randomly sampled parameters
+# Setup directories
 
-val_metadata = RunMetadata(
-    split="val",
-    total_num_events=320_000,
-    num_trials=20,
-    num_subtrials_per_trial=1,
-    parameter_bounds=vary_parameter_bounds,
-    sampling_type="random",
-)
+dirs = [
+    setup_run_dir(metadata, data_dir) 
+    for metadata in metadatas
+]
 
-val_dir = setup_run_dir(run_metadata=val_metadata, parent_dir=data_dir)
 
-submit_jobs(
-    run_dir=val_dir,
-    sim_steer_file_path=sim_steer_file_path,
-    recon_steer_file_path=recon_steer_file_path,
-    template_dec_file_path=template_dec_file_path,
-    debug=debug,
-)
+# Submit jobs
+
+for dir_ in dirs:
+    submit_jobs(
+        run_dir=dir_,
+        sim_steer_file_path=sim_steer_file_path,
+        recon_steer_file_path=recon_steer_file_path,
+        template_dec_file_path=template_dec_file_path,
+        debug=debug,
+    )

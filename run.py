@@ -62,16 +62,13 @@ metadatas = [
         num_subtrials_per_trial=1,
         parameter_bounds=vary_parameter_bounds,
         sampling_type="random",
-    )
+    ),
 ]
 
 
 # Setup directories
 
-dirs = [
-    setup_run_dir(metadata, data_dir) 
-    for metadata in metadatas
-]
+dirs = [setup_run_dir(metadata, data_dir) for metadata in metadatas]
 
 
 # Submit jobs

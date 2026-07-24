@@ -7,7 +7,7 @@ from b2_run_sim import (
 
 # Setup
 
-debug = True
+debug = False
 
 data_dir = "data/"
 sim_steer_file_path = "steer_sim.py"

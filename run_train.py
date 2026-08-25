@@ -29,66 +29,40 @@ sm_parameter_bounds = {
 # Metadata
 
 metadatas = [
-    # RunMetadata(
-    #    split="train_vary",
-    #    total_num_events=5_000_000,
-    #    num_trials=1_000,
-    #    num_subtrials_per_trial=1,
-    #    parameter_bounds=vary_parameter_bounds,
-    #    sampling_type="grid",
-    #    parameter_grid_counts={
-    #        "dC_7": 1,
-    #        "dC_9": 1_000,
-    #        "dC_10": 1,
-    #    },
-    # ),
-    # RunMetadata(
-    #    split="train_sm",
-    #    total_num_events=5_000_000,
-    #    num_trials=1,
-    #    num_subtrials_per_trial=1_000,
-    #    parameter_bounds=sm_parameter_bounds,
-    #    sampling_type="grid",
-    #    parameter_grid_counts={
-    #        "dC_7": 1,
-    #        "dC_9": 1,
-    #        "dC_10": 1,
-    #    },
-    # ),
     RunMetadata(
-        split="val_vary",
-        total_num_events=1_000_000,
-        num_trials=200,
-        num_subtrials_per_trial=1,
-        parameter_bounds=vary_parameter_bounds,
-        sampling_type="grid",
-        parameter_grid_counts={
-            "dC_7": 1,
-            "dC_9": 200,
-            "dC_10": 1,
-        },
+       split="train_vary",
+       total_num_events=5_000_000,
+       num_trials=1_000,
+       num_subtrials_per_trial=1,
+       parameter_bounds=vary_parameter_bounds,
+       sampling_type="grid",
+       parameter_grid_counts={
+           "dC_7": 1,
+           "dC_9": 1_000,
+           "dC_10": 1,
+       },
     ),
     RunMetadata(
-        split="val_sm",
-        total_num_events=1_000_000,
-        num_trials=1,
-        num_subtrials_per_trial=200,
-        parameter_bounds=sm_parameter_bounds,
-        sampling_type="grid",
-        parameter_grid_counts={
-            "dC_7": 1,
-            "dC_9": 1,
-            "dC_10": 1,
-        },
+       split="train_sm",
+       total_num_events=5_000_000,
+       num_trials=1,
+       num_subtrials_per_trial=1_000,
+       parameter_bounds=sm_parameter_bounds,
+       sampling_type="grid",
+       parameter_grid_counts={
+           "dC_7": 1,
+           "dC_9": 1,
+           "dC_10": 1,
+       },
     ),
-    # RunMetadata(
-    #    split="val",
-    #    total_num_events=320_000,
-    #    num_trials=20,
-    #    num_subtrials_per_trial=1,
-    #    parameter_bounds=vary_parameter_bounds,
-    #    sampling_type="random",
-    # ),
+    RunMetadata(
+       split="val_sets",
+       total_num_events=320_000,
+       num_trials=20,
+       num_subtrials_per_trial=1,
+       parameter_bounds=vary_parameter_bounds,
+       sampling_type="random",
+    ),
 ]
 
 
